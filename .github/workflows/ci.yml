@@ -1,0 +1,41 @@
+name: Continuous Integration & Verification
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test:
+    name: Run Test Suite & Agent Quality Checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Codebase
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install System FFmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg fonts-liberation
+
+      - name: Install Python Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install opencv-python-headless imageio-ffmpeg
+
+      - name: Run Pytest Suite
+        env:
+          PYTHONPATH: .
+          VEO_SIMULATION_MODE: "true"
+          REQUIRE_MANUAL_APPROVAL: "false"
+        run: |
+          pytest tests/ -v -o asyncio_default_fixture_loop_scope=function

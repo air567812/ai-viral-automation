@@ -1,0 +1,99 @@
+name: Autonomous Cloud Content Factory
+
+on:
+  # Automated Cloud Schedule: Runs every 6 hours
+  schedule:
+    - cron: '0 */6 * * *'
+
+  # Manual on-demand trigger with configurable options
+  workflow_dispatch:
+    inputs:
+      niche:
+        description: 'Target Content Niche'
+        required: true
+        default: 'sci-fi and mystery'
+        type: choice
+        options:
+          - 'sci-fi and mystery'
+          - 'suspense and thriller'
+          - 'horror stories'
+          - 'educational micro-content'
+          - 'interesting facts'
+          - 'motivational stories'
+          - 'comedy'
+      auto_publish:
+        description: 'Automatically Publish to Instagram & YouTube (Set true to skip manual approval)'
+        required: true
+        default: true
+        type: boolean
+      duration:
+        description: 'Target Video Duration (Seconds)'
+        required: true
+        default: '45'
+        type: string
+
+jobs:
+  run-content-factory:
+    name: Autonomous Agent Execution Pipeline
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install System FFmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg fonts-liberation
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install opencv-python-headless imageio-ffmpeg
+
+      - name: Execute Autonomous Content Cycle
+        env:
+          PYTHONPATH: .
+          # AI Model Secrets
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GOOGLE_GENAI_API_KEY: ${{ secrets.GOOGLE_GENAI_API_KEY }}
+          VEO_SIMULATION_MODE: ${{ secrets.VEO_SIMULATION_MODE || 'false' }}
+          VEO_MODEL: ${{ secrets.VEO_MODEL || 'veo-2.0-generate-001' }}
+          # Social Media Credentials
+          INSTAGRAM_ACCOUNT_ID: ${{ secrets.INSTAGRAM_ACCOUNT_ID }}
+          INSTAGRAM_ACCESS_TOKEN: ${{ secrets.INSTAGRAM_ACCESS_TOKEN }}
+          YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
+          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+          YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+          # Storage & Zero-Waste Policy
+          STORAGE_PROVIDER: "local"
+          AUTO_CLEANUP_AFTER_UPLOAD: "true"
+        run: |
+          NICHE="${{ github.event.inputs.niche || 'sci-fi and mystery' }}"
+          DURATION="${{ github.event.inputs.duration || '45' }}"
+          
+          # Check auto-publish flag
+          AUTO_PUB_FLAG=""
+          if [ "${{ github.event.inputs.auto_publish }}" = "true" ] || [ "${{ github.event_name }}" = "schedule" ]; then
+            AUTO_PUB_FLAG="--auto-publish"
+          fi
+
+          python backend/cli.py --niche "$NICHE" --duration "$DURATION" $AUTO_PUB_FLAG
+
+      - name: Archive Generation Logs & Database
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: content-factory-logs
+          path: |
+            data/automation.db
+            data/media/*.json
+          retention-days: 7

@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  # Autonomous Content Engine Backend & Web Dashboard
+  web:
+    build: .
+    container_name: viral_reels_engine
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - APP_ENV=production
+      - DATABASE_URL=postgresql+asyncpg://postgres:postgres@db:5432/viral_reels_db
+      - REDIS_URL=redis://redis:6379/0
+      - STORAGE_PROVIDER=local
+      - LOCAL_STORAGE_DIR=/app/data/media
+      - AUTO_CLEANUP_AFTER_UPLOAD=true
+      - REQUIRE_MANUAL_APPROVAL=true
+    volumes:
+      - media_storage:/app/data/media
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  # Relational Database for Trends, Series, Episodes & Analytics
+  db:
+    image: postgres:15-alpine
+    container_name: viral_reels_postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=viral_reels_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # In-Memory Cache & Task Queue Broker
+  redis:
+    image: redis:7-alpine
+    container_name: viral_reels_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+
+volumes:
+  postgres_data:
+  media_storage:

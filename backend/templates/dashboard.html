@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Autonomous AI Viral Reels & YouTube Shorts Studio</title>
+  <!-- Tailwind CSS & Lucide Icons -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0fdf4',
+              500: '#22c55e',
+              600: '#16a34a',
+              900: '#14532d'
+            },
+            accent: {
+              500: '#8b5cf6',
+              600: '#7c3aed'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #18181b; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 3px; }
+  </style>
+</head>
+<body class="bg-zinc-950 text-zinc-100 min-h-screen flex flex-col antialiased selection:bg-brand-500 selection:text-black">
+
+  <!-- Top Header Navigation -->
+  <header class="border-b border-zinc-800 bg-zinc-900/60 backdrop-blur sticky top-0 z-40 px-6 py-3.5 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-accent-500 flex items-center justify-center shadow-lg shadow-brand-500/20">
+        <i data-lucide="sparkles" class="w-5 h-5 text-white"></i>
+      </div>
+      <div>
+        <h1 class="font-bold text-lg leading-tight flex items-center gap-2">
+          Autonomous Reels Factory
+          <span class="text-xs bg-brand-500/10 text-brand-400 border border-brand-500/30 px-2 py-0.5 rounded-full font-mono">Veo 2 • Active</span>
+        </h1>
+        <p class="text-xs text-zinc-400">10 Autonomous AI Agents • Zero-Waste Storage • Multi-Platform Publishing</p>
+      </div>
+    </div>
+
+    <!-- Quick Pipeline Trigger & Status -->
+    <div class="flex items-center gap-3">
+      <div id="schedulerStatusBadge" class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-xs">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span class="text-zinc-300 font-medium">Scheduler: Running (Every 6h)</span>
+      </div>
+
+      <button onclick="triggerAutonomousCycle()" id="runCycleBtn" class="flex items-center gap-2 bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-700 text-black font-semibold text-xs px-4 py-2 rounded-lg transition shadow-md shadow-brand-500/20 active:scale-95">
+        <i data-lucide="play" class="w-4 h-4 fill-black"></i>
+        <span>Trigger Autonomous Cycle</span>
+      </button>
+
+      <button onclick="toggleScheduler()" id="pauseBtn" class="flex items-center gap-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs px-3 py-2 rounded-lg transition border border-zinc-700">
+        <i data-lucide="pause" class="w-3.5 h-3.5"></i>
+        <span>Pause</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Metric Quick Stats Bar -->
+  <section class="border-b border-zinc-800/80 bg-zinc-900/30 px-6 py-4 grid grid-cols-2 sm:grid-cols-4 gap-4">
+    <div class="bg-zinc-900/50 border border-zinc-800 p-3.5 rounded-xl">
+      <span class="text-xs text-zinc-400 block mb-1">Total Episodes Generated</span>
+      <div class="flex items-baseline justify-between">
+        <span id="statEpisodes" class="text-2xl font-bold text-white tracking-tight">--</span>
+        <span class="text-xs text-brand-400 font-medium">+100% Autonomous</span>
+      </div>
+    </div>
+
+    <div class="bg-zinc-900/50 border border-zinc-800 p-3.5 rounded-xl">
+      <span class="text-xs text-zinc-400 block mb-1">Total Short-Form Views</span>
+      <div class="flex items-baseline justify-between">
+        <span id="statViews" class="text-2xl font-bold text-white tracking-tight">--</span>
+        <span class="text-xs text-purple-400 font-medium">IG Reels + YT Shorts</span>
+      </div>
+    </div>
+
+    <div class="bg-zinc-900/50 border border-zinc-800 p-3.5 rounded-xl">
+      <span class="text-xs text-zinc-400 block mb-1">Viral Shares & Saves</span>
+      <div class="flex items-baseline justify-between">
+        <span id="statShares" class="text-2xl font-bold text-white tracking-tight">--</span>
+        <span class="text-xs text-emerald-400 font-medium">High Virality</span>
+      </div>
+    </div>
+
+    <div class="bg-zinc-900/50 border border-zinc-800 p-3.5 rounded-xl">
+      <span class="text-xs text-zinc-400 block mb-1">Storage Optimization</span>
+      <div class="flex items-baseline justify-between">
+        <span class="text-2xl font-bold text-emerald-400 tracking-tight">Zero-Waste</span>
+        <span class="text-xs text-zinc-400 font-medium">Auto-Purged Post Upload</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tab Bar Navigation -->
+  <nav class="border-b border-zinc-800 px-6 flex gap-6 text-sm bg-zinc-950 sticky top-[65px] z-30">
+    <button onclick="switchTab('episodesTab')" id="tabBtn-episodesTab" class="py-3 font-medium text-brand-400 border-b-2 border-brand-500 flex items-center gap-2">
+      <i data-lucide="video" class="w-4 h-4"></i> Episodes & Approvals
+    </button>
+    <button onclick="switchTab('trendsTab')" id="tabBtn-trendsTab" class="py-3 font-medium text-zinc-400 hover:text-zinc-200 border-b-2 border-transparent flex items-center gap-2">
+      <i data-lucide="trending-up" class="w-4 h-4"></i> Viral Trends Engine
+    </button>
+    <button onclick="switchTab('seriesTab')" id="tabBtn-seriesTab" class="py-3 font-medium text-zinc-400 hover:text-zinc-200 border-b-2 border-transparent flex items-center gap-2">
+      <i data-lucide="book-open" class="w-4 h-4"></i> Series & Character Bible
+    </button>
+    <button onclick="switchTab('socialsTab')" id="tabBtn-socialsTab" class="py-3 font-medium text-zinc-400 hover:text-zinc-200 border-b-2 border-transparent flex items-center gap-2">
+      <i data-lucide="share-2" class="w-4 h-4"></i> Publishing & Accounts
+    </button>
+    <button onclick="switchTab('analyticsTab')" id="tabBtn-analyticsTab" class="py-3 font-medium text-zinc-400 hover:text-zinc-200 border-b-2 border-transparent flex items-center gap-2">
+      <i data-lucide="bar-chart-3" class="w-4 h-4"></i> Self-Learning & Analytics
+    </button>
+    <button onclick="switchTab('settingsTab')" id="tabBtn-settingsTab" class="py-3 font-medium text-zinc-400 hover:text-zinc-200 border-b-2 border-transparent flex items-center gap-2">
+      <i data-lucide="sliders" class="w-4 h-4"></i> Cloud & Storage Settings
+    </button>
+  </nav>
+
+  <!-- Main View Container -->
+  <main class="p-6 flex-1 max-w-7xl mx-auto w-full">
+
+    <!-- TAB 1: EPISODES & APPROVALS -->
+    <div id="episodesTab" class="tab-pane space-y-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-lg font-bold">Episode Production Pipeline</h2>
+          <p class="text-xs text-zinc-400">Review generated vertical videos, preview scenes, approve for social publication or review script details.</p>
+        </div>
+        <button onclick="loadEpisodes()" class="text-xs text-zinc-400 hover:text-zinc-200 flex items-center gap-1">
+          <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Refresh
+        </button>
+      </div>
+
+      <div id="episodesList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <!-- Rendered dynamically -->
+        <div class="p-8 text-center text-zinc-500 col-span-full">Loading episodes pipeline...</div>
+      </div>
+    </div>
+
+    <!-- TAB 2: VIRAL TRENDS ENGINE -->
+    <div id="trendsTab" class="tab-pane hidden space-y-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-lg font-bold">Discovered Short-Form Trends</h2>
+          <p class="text-xs text-zinc-400">Autonomous research engine mining hooks, formats, and high-share mechanics from Instagram Reels, YouTube Shorts & Google Trends.</p>
+        </div>
+        <button onclick="triggerTrendResearch()" class="bg-zinc-800 hover:bg-zinc-700 text-xs px-3.5 py-2 rounded-lg font-medium flex items-center gap-2">
+          <i data-lucide="search" class="w-3.5 h-3.5"></i> Scan Emerging Trends Now
+        </button>
+      </div>
+
+      <div id="trendsList" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+
+    <!-- TAB 3: SERIES & CHARACTER BIBLE -->
+    <div id="seriesTab" class="tab-pane hidden space-y-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-lg font-bold">Active Episodic Series & Continuity Bibles</h2>
+          <p class="text-xs text-zinc-400">Maintains consistent visual character prompts, voices, and episodic cliffhangers across multi-part storytelling.</p>
+        </div>
+      </div>
+
+      <div id="seriesList" class="space-y-4">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+
+    <!-- TAB 4: PUBLISHING & SOCIALS -->
+    <div id="socialsTab" class="tab-pane hidden space-y-6">
+      <div>
+        <h2 class="text-lg font-bold">Social Media Publishing Integration</h2>
+        <p class="text-xs text-zinc-400">Official Instagram Graph API and Google YouTube Data API v3 upload connectors with verified status tracking.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Instagram Card -->
+        <div class="border border-zinc-800 bg-zinc-900/60 p-5 rounded-2xl space-y-4">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-yellow-500 via-pink-500 to-purple-600 flex items-center justify-center">
+                <i data-lucide="instagram" class="w-5 h-5 text-white"></i>
+              </div>
+              <div>
+                <h3 class="font-bold text-sm">Meta Instagram Graph API</h3>
+                <p class="text-xs text-zinc-400">Reels Publishing Container Protocol</p>
+              </div>
+            </div>
+            <span class="text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full font-mono">Ready</span>
+          </div>
+
+          <div class="text-xs text-zinc-300 space-y-1.5 bg-zinc-950 p-3.5 rounded-xl border border-zinc-800/80">
+            <div class="flex justify-between"><span class="text-zinc-500">Target:</span> <span>Instagram Professional (Creator/Business)</span></div>
+            <div class="flex justify-between"><span class="text-zinc-500">Aspect Ratio:</span> <span>9:16 Vertical (1080x1920)</span></div>
+            <div class="flex justify-between"><span class="text-zinc-500">Max Duration:</span> <span>90 seconds (Default: 45s)</span></div>
+            <div class="flex justify-between"><span class="text-zinc-500">Verification:</span> <span>Automatic status_code polling</span></div>
+          </div>
+        </div>
+
+        <!-- YouTube Card -->
+        <div class="border border-zinc-800 bg-zinc-900/60 p-5 rounded-2xl space-y-4">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-red-600 flex items-center justify-center">
+                <i data-lucide="youtube" class="w-5 h-5 text-white"></i>
+              </div>
+              <div>
+                <h3 class="font-bold text-sm">Google YouTube Data API v3</h3>
+                <p class="text-xs text-zinc-400">YouTube Shorts Resumable Uploader</p>
+              </div>
+            </div>
+            <span class="text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full font-mono">Ready</span>
+          </div>
+
+          <div class="text-xs text-zinc-300 space-y-1.5 bg-zinc-950 p-3.5 rounded-xl border border-zinc-800/80">
+            <div class="flex justify-between"><span class="text-zinc-500">Target:</span> <span>Official YouTube Channel</span></div>
+            <div class="flex justify-between"><span class="text-zinc-500">Aspect Ratio:</span> <span>Vertical 9:16</span></div>
+            <div class="flex justify-between"><span class="text-zinc-500">Format:</span> <span>Auto #Shorts Tagging in Title & Desc</span></div>
+            <div class="flex justify-between"><span class="text-zinc-500">Upload Type:</span> <span>Chunked Resumable Upload Stream</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 5: ANALYTICS & SELF-LEARNING -->
+    <div id="analyticsTab" class="tab-pane hidden space-y-6">
+      <div>
+        <h2 class="text-lg font-bold">Analytics & Self-Learning Intelligence</h2>
+        <p class="text-xs text-zinc-400">Autonomous feedback loops tuning opening hooks, pacing, and visual styles from empirical retention and share rates.</p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="border border-zinc-800 bg-zinc-900/60 p-5 rounded-2xl space-y-4">
+          <h3 class="font-bold text-sm flex items-center gap-2">
+            <i data-lucide="brain-circuit" class="w-4 h-4 text-purple-400"></i>
+            Self-Learning Feedback & Strategy Tuning
+          </h3>
+          <div id="strategyFeedbackList" class="space-y-3">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+
+        <div class="border border-zinc-800 bg-zinc-900/60 p-5 rounded-2xl space-y-4">
+          <h3 class="font-bold text-sm flex items-center gap-2">
+            <i data-lucide="activity" class="w-4 h-4 text-brand-400"></i>
+            Recent Episode Performance Telemetry
+          </h3>
+          <div id="recentTelemetryList" class="space-y-2">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 6: CLOUD & STORAGE SETTINGS -->
+    <div id="settingsTab" class="tab-pane hidden space-y-6 max-w-2xl">
+      <div>
+        <h2 class="text-lg font-bold">Cloud Engine & Storage Optimization Controls</h2>
+        <p class="text-xs text-zinc-400">Configure zero-waste storage policies, manual approval gates, and video duration.</p>
+      </div>
+
+      <form id="settingsForm" onsubmit="saveSettings(event)" class="space-y-5 border border-zinc-800 bg-zinc-900/60 p-6 rounded-2xl">
+        <div class="flex items-center justify-between p-3.5 bg-zinc-950 rounded-xl border border-zinc-800">
+          <div>
+            <label class="font-bold text-sm block">Require Manual Approval</label>
+            <span class="text-xs text-zinc-400">Pause for human sign-off before publishing approved videos to Instagram and YouTube.</span>
+          </div>
+          <input type="checkbox" id="set_manual_approval" class="w-5 h-5 accent-brand-500 rounded">
+        </div>
+
+        <div class="flex items-center justify-between p-3.5 bg-zinc-950 rounded-xl border border-zinc-800">
+          <div>
+            <label class="font-bold text-sm block">Zero-Waste Storage Auto-Purge</label>
+            <span class="text-xs text-zinc-400">Immediately delete intermediate scene clips and raw renders once dual-platform uploads are verified.</span>
+          </div>
+          <input type="checkbox" id="set_auto_cleanup" class="w-5 h-5 accent-brand-500 rounded">
+        </div>
+
+        <div class="flex items-center justify-between p-3.5 bg-zinc-950 rounded-xl border border-zinc-800">
+          <div>
+            <label class="font-bold text-sm block">Google Veo Simulation Mode</label>
+            <span class="text-xs text-zinc-400">Generate high-fidelity local 9:16 clips for offline development and testing.</span>
+          </div>
+          <input type="checkbox" id="set_veo_simulation" class="w-5 h-5 accent-brand-500 rounded">
+        </div>
+
+        <div>
+          <label class="text-xs font-semibold text-zinc-400 block mb-1">Target Video Duration (Seconds)</label>
+          <input type="number" id="set_duration" min="20" max="60" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3.5 py-2 text-sm">
+        </div>
+
+        <button type="submit" class="bg-brand-500 hover:bg-brand-600 text-black font-semibold text-xs px-5 py-2.5 rounded-lg transition">
+          Save System Configuration
+        </button>
+      </form>
+    </div>
+
+  </main>
+
+  <!-- Video Preview Modal -->
+  <div id="videoModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-lg w-full p-6 space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 id="modalTitle" class="font-bold text-base truncate">Preview Episode</h3>
+        <button onclick="closeModal()" class="text-zinc-400 hover:text-white">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="aspect-[9/16] bg-black rounded-xl overflow-hidden border border-zinc-800 max-h-[460px] mx-auto flex items-center justify-center relative">
+        <video id="modalVideo" controls class="w-full h-full object-contain"></video>
+      </div>
+
+      <div class="text-xs text-zinc-300 space-y-2 bg-zinc-950 p-3 rounded-xl border border-zinc-800">
+        <p><strong>Hook:</strong> <span id="modalHook" class="text-zinc-400"></span></p>
+        <p><strong>Script:</strong> <span id="modalScript" class="text-zinc-400"></span></p>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-2">
+        <button onclick="closeModal()" class="bg-zinc-800 hover:bg-zinc-700 text-xs px-4 py-2 rounded-lg">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Tab Switching
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-pane').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('nav button').forEach(el => {
+        el.classList.remove('text-brand-400', 'border-brand-500');
+        el.classList.add('text-zinc-400', 'border-transparent');
+      });
+      document.getElementById(tabId).classList.remove('hidden');
+      const activeBtn = document.getElementById('tabBtn-' + tabId);
+      if (activeBtn) {
+        activeBtn.classList.remove('text-zinc-400', 'border-transparent');
+        activeBtn.classList.add('text-brand-400', 'border-brand-500');
+      }
+      lucide.createIcons();
+    }
+
+    // Load Data
+    async function loadEpisodes() {
+      try {
+        const res = await fetch('/api/episodes');
+        const episodes = await res.json();
+        const container = document.getElementById('episodesList');
+        document.getElementById('statEpisodes').textContent = episodes.length;
+
+        if (episodes.length === 0) {
+          container.innerHTML = `
+            <div class="p-10 border border-dashed border-zinc-800 rounded-2xl text-center col-span-full space-y-3">
+              <i data-lucide="sparkles" class="w-8 h-8 text-brand-400 mx-auto"></i>
+              <h3 class="font-bold text-sm">No Episodes Generated Yet</h3>
+              <p class="text-xs text-zinc-400 max-w-sm mx-auto">Click "Trigger Autonomous Cycle" above to discover viral trends, generate a 9:16 episodic script, synthesize Veo clips, and edit the master episode.</p>
+              <button onclick="triggerAutonomousCycle()" class="bg-brand-500 text-black font-semibold text-xs px-4 py-2 rounded-lg">Generate First Episode</button>
+            </div>
+          `;
+          lucide.createIcons();
+          return;
+        }
+
+        container.innerHTML = episodes.map(ep => {
+          let statusBadge = '';
+          if (ep.status === 'published') {
+            statusBadge = '<span class="text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full font-mono">Published</span>';
+          } else if (ep.status === 'pending_approval') {
+            statusBadge = '<span class="text-xs bg-amber-500/10 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-full font-mono">Pending Approval</span>';
+          } else if (ep.status === 'approved') {
+            statusBadge = '<span class="text-xs bg-blue-500/10 text-blue-400 border border-blue-500/30 px-2 py-0.5 rounded-full font-mono">Approved</span>';
+          } else {
+            statusBadge = `<span class="text-xs bg-zinc-800 text-zinc-300 px-2 py-0.5 rounded-full font-mono capitalize">${ep.status}</span>`;
+          }
+
+          const hasVideo = ep.video_path ? true : false;
+          
+          return `
+            <div class="border border-zinc-800 bg-zinc-900/60 p-5 rounded-2xl space-y-4 flex flex-col justify-between hover:border-zinc-700 transition">
+              <div>
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-xs font-mono text-zinc-500">Episode #${ep.episode_number}</span>
+                  ${statusBadge}
+                </div>
+                <h3 class="font-bold text-sm leading-snug mb-1">${ep.title}</h3>
+                <p class="text-xs text-zinc-400 line-clamp-2 mb-3">"${ep.hook_3s}"</p>
+                
+                <div class="text-[11px] font-mono text-zinc-500 flex items-center gap-3">
+                  <span>9:16 Vertical</span>
+                  <span>•</span>
+                  <span>${ep.actual_duration_sec || ep.target_duration_sec}s</span>
+                  <span>•</span>
+                  <span>${ep.scenes.length} Scenes</span>
+                </div>
+              </div>
+
+              <div class="pt-2 border-t border-zinc-800/80 flex items-center justify-between gap-2">
+                <button onclick="previewEpisode(${ep.id}, '${escapeQuotes(ep.title)}', '${escapeQuotes(ep.hook_3s)}', '${escapeQuotes(ep.full_script || '')}', '${ep.video_path || ''}')" class="text-xs bg-zinc-800 hover:bg-zinc-700 px-3 py-1.5 rounded-lg flex items-center gap-1.5">
+                  <i data-lucide="play" class="w-3 h-3"></i> Preview
+                </button>
+
+                ${ep.status === 'pending_approval' ? `
+                  <button onclick="approveEpisode(${ep.id})" class="text-xs bg-emerald-500 hover:bg-emerald-600 text-black font-semibold px-3 py-1.5 rounded-lg flex items-center gap-1">
+                    <i data-lucide="check" class="w-3 h-3"></i> Approve & Publish
+                  </button>
+                ` : ''}
+              </div>
+            </div>
+          `;
+        }).join('');
+        lucide.createIcons();
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function escapeQuotes(str) {
+      if (!str) return '';
+      return str.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+    }
+
+    // Preview Modal
+    function previewEpisode(id, title, hook, script, videoPath) {
+      document.getElementById('modalTitle').textContent = title;
+      document.getElementById('modalHook').textContent = hook;
+      document.getElementById('modalScript').textContent = script;
+      const videoEl = document.getElementById('modalVideo');
+      if (videoPath) {
+        videoEl.src = '/media/renders/' + videoPath.split(/[\\/]/).pop();
+      } else {
+        videoEl.src = '';
+      }
+      document.getElementById('videoModal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeModal() {
+      const videoEl = document.getElementById('modalVideo');
+      videoEl.pause();
+      document.getElementById('videoModal').classList.add('hidden');
+    }
+
+    // Approve Episode
+    async function approveEpisode(id) {
+      const btn = event.currentTarget;
+      btn.disabled = true;
+      btn.textContent = 'Publishing...';
+      try {
+        const res = await fetch(`/api/episodes/${id}/approve`, { method: 'POST' });
+        const data = await res.json();
+        alert(`Episode #${id} published to Instagram & YouTube! Verified URLs:\n- Instagram: ${data.publishing.results.instagram.url}\n- YouTube: ${data.publishing.results.youtube.url}`);
+        loadEpisodes();
+        loadAnalytics();
+      } catch (err) {
+        alert('Failed to publish episode: ' + err);
+        loadEpisodes();
+      }
+    }
+
+    // Trigger Pipeline
+    async function triggerAutonomousCycle() {
+      const btn = document.getElementById('runCycleBtn');
+      btn.disabled = true;
+      btn.classList.add('opacity-50');
+      btn.innerHTML = '<i data-lucide="loader" class="w-4 h-4 animate-spin"></i><span>Running Autonomous Agents...</span>';
+      lucide.createIcons();
+
+      try {
+        const res = await fetch('/api/pipeline/run', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ niche: 'sci-fi and mystery' })
+        });
+        const data = await res.json();
+        alert(`Autonomous cycle completed! Created Episode #${data.episode_id}. Check the Episodes & Approvals tab to review the generated video.`);
+        loadEpisodes();
+        loadTrends();
+        loadSeries();
+      } catch (err) {
+        alert('Error executing autonomous cycle: ' + err);
+      } finally {
+        btn.disabled = false;
+        btn.classList.remove('opacity-50');
+        btn.innerHTML = '<i data-lucide="play" class="w-4 h-4 fill-black"></i><span>Trigger Autonomous Cycle</span>';
+        lucide.createIcons();
+      }
+    }
+
+    // Load Trends
+    async function loadTrends() {
+      try {
+        const res = await fetch('/api/trends');
+        const trends = await res.json();
+        const container = document.getElementById('trendsList');
+        if (trends.length === 0) {
+          container.innerHTML = '<div class="p-8 text-zinc-500 col-span-full text-center">No trends indexed. Click "Scan Emerging Trends Now".</div>';
+          return;
+        }
+
+        container.innerHTML = trends.map(t => `
+          <div class="border border-zinc-800 bg-zinc-900/60 p-5 rounded-2xl space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-mono uppercase text-brand-400 bg-brand-500/10 px-2 py-0.5 rounded border border-brand-500/30">${t.niche}</span>
+              <span class="text-xs text-zinc-400">Virality Score: <strong class="text-white">${t.virality_score}/100</strong></span>
+            </div>
+            <h3 class="font-bold text-sm leading-snug">${t.topic}</h3>
+            <div class="p-3 bg-zinc-950 rounded-xl text-xs space-y-1.5 border border-zinc-800/80">
+              <p><strong>Hook:</strong> <span class="text-zinc-300">"${t.hook_3s}"</span></p>
+              <p><strong>Pacing:</strong> <span class="text-zinc-400">${t.editing_style}</span></p>
+              <p><strong>Driver:</strong> <span class="text-zinc-400">${t.reasons_successful || 'Curiosity Gap'}</span></p>
+            </div>
+          </div>
+        `).join('');
+        lucide.createIcons();
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    // Load Series
+    async function loadSeries() {
+      try {
+        const res = await fetch('/api/series');
+        const series = await res.json();
+        const container = document.getElementById('seriesList');
+        if (series.length === 0) {
+          container.innerHTML = '<div class="p-8 text-zinc-500 text-center">No series created yet. Trigger an autonomous cycle to create a series with Character Bible.</div>';
+          return;
+        }
+
+        container.innerHTML = series.map(s => `
+          <div class="border border-zinc-800 bg-zinc-900/60 p-5 rounded-2xl space-y-3">
+            <div class="flex items-center justify-between">
+              <h3 class="font-bold text-base">${s.title}</h3>
+              <span class="text-xs bg-zinc-800 px-2.5 py-1 rounded-full text-zinc-300">${s.episodes.length} Episodes</span>
+            </div>
+            <p class="text-xs text-zinc-400">${s.theme}</p>
+            <div class="text-xs text-zinc-500 flex gap-4 pt-2 border-t border-zinc-800">
+              <span>Audience: ${s.target_audience}</span>
+              <span>•</span>
+              <span>Niche: ${s.niche}</span>
+            </div>
+          </div>
+        `).join('');
+        lucide.createIcons();
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    // Load Analytics
+    async function loadAnalytics() {
+      try {
+        const res = await fetch('/api/analytics');
+        const data = await res.json();
+        document.getElementById('statViews').textContent = data.summary.total_views.toLocaleString();
+        document.getElementById('statShares').textContent = data.summary.total_shares.toLocaleString();
+
+        const feedbackContainer = document.getElementById('strategyFeedbackList');
+        if (data.strategy_learnings.length === 0) {
+          feedbackContainer.innerHTML = '<div class="text-xs text-zinc-500">No strategy learnings recorded yet.</div>';
+        } else {
+          feedbackContainer.innerHTML = data.strategy_learnings.map(f => `
+            <div class="p-3.5 bg-zinc-950 rounded-xl border border-zinc-800 text-xs space-y-1">
+              <span class="font-bold text-brand-400 block">${f.niche.toUpperCase()} NICHE</span>
+              <p><strong>Top Hook:</strong> ${f.winning_hooks}</p>
+              <p class="text-zinc-400">${f.learnings}</p>
+            </div>
+          `).join('');
+        }
+
+        const recentContainer = document.getElementById('recentTelemetryList');
+        if (data.recent_records.length === 0) {
+          recentContainer.innerHTML = '<div class="text-xs text-zinc-500">No telemetry recorded yet.</div>';
+        } else {
+          recentContainer.innerHTML = data.recent_records.map(r => `
+            <div class="p-2.5 bg-zinc-950 rounded-lg border border-zinc-800 text-xs flex justify-between items-center">
+              <div>
+                <span class="font-semibold capitalize text-zinc-200">${r.platform}</span>
+                <span class="text-zinc-500 text-[10px] block">Episode #${r.episode_id}</span>
+              </div>
+              <div class="text-right text-[11px]">
+                <span class="text-white font-mono">${r.views.toLocaleString()} views</span>
+                <span class="text-emerald-400 block">${r.retention_rate_pct}% retention</span>
+              </div>
+            </div>
+          `).join('');
+        }
+        lucide.createIcons();
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    // Load Settings
+    async function loadSettings() {
+      try {
+        const res = await fetch('/api/settings');
+        const cfg = await res.json();
+        document.getElementById('set_manual_approval').checked = cfg.require_manual_approval;
+        document.getElementById('set_auto_cleanup').checked = cfg.auto_cleanup_after_upload;
+        document.getElementById('set_veo_simulation').checked = cfg.veo_simulation_mode;
+        document.getElementById('set_duration').value = cfg.default_video_duration_seconds;
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function saveSettings(e) {
+      e.preventDefault();
+      const payload = {
+        require_manual_approval: document.getElementById('set_manual_approval').checked,
+        auto_cleanup_after_upload: document.getElementById('set_auto_cleanup').checked,
+        veo_simulation_mode: document.getElementById('set_veo_simulation').checked,
+        default_video_duration_seconds: parseInt(document.getElementById('set_duration').value),
+        target_aspect_ratio: "9:16",
+        target_resolution_width: 1080,
+        target_resolution_height: 1920,
+        trend_research_interval_hours: 6,
+        tts_provider: "edge-tts"
+      };
+
+      try {
+        const res = await fetch('/api/settings', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(payload)
+        });
+        alert('Settings saved successfully!');
+      } catch (err) {
+        alert('Failed to save settings: ' + err);
+      }
+    }
+
+    // Initial load
+    window.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      loadEpisodes();
+      loadTrends();
+      loadSeries();
+      loadAnalytics();
+      loadSettings();
+    });
+  </script>
+</body>
+</html>
