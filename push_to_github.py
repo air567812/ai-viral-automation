@@ -38,7 +38,8 @@ def main():
 
     print(f"Pushing to remote {args.repo_url} on branch '{args.branch}'...")
     try:
-        porcelain.push(base_dir, repo_url, f"refs/heads/{args.branch}")
+        refspec = f"refs/heads/{args.branch}:refs/heads/{args.branch}".encode("utf-8")
+        porcelain.push(base_dir, repo_url, refspecs=[refspec])
         print("\n=======================================================")
         print("SUCCESS! Successfully pushed to GitHub.")
         print("Navigate to the 'Actions' tab in your GitHub repository")
