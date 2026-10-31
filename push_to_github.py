@@ -3,6 +3,7 @@ Pure-Python GitHub Pusher using Dulwich (zero external Git.exe required).
 Usage:
     python push_to_github.py https://github.com/YOUR_USER/YOUR_REPO.git --token YOUR_GITHUB_PAT
 """
+import os
 import sys
 import argparse
 from dulwich import porcelain
@@ -22,21 +23,22 @@ def main():
         clean = repo_url.replace("https://", "")
         repo_url = f"https://oauth2:{args.token}@{clean}"
 
-    print(f"Opening local Git repository at current directory...")
-    repo = Repo(".")
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    print(f"Opening local Git repository at {base_dir}...")
+    repo = Repo(base_dir)
 
     print("Staging all updated project files...")
-    porcelain.add(".", paths=["."])
+    porcelain.add(base_dir, paths=["."])
 
     try:
-        porcelain.commit(".", message=b"feat: autonomous AI viral reels automation platform", committer=b"AI Assistant <ai@antigravity.local>", author=b"AI Assistant <ai@antigravity.local>")
+        porcelain.commit(base_dir, message=b"feat: autonomous AI viral reels automation platform", committer=b"AI Assistant <ai@antigravity.local>", author=b"AI Assistant <ai@antigravity.local>")
         print("Committed latest project files.")
     except Exception as e:
         print("Working tree clean or commit already made.")
 
     print(f"Pushing to remote {args.repo_url} on branch '{args.branch}'...")
     try:
-        porcelain.push(".", repo_url, f"refs/heads/{args.branch}")
+        porcelain.push(base_dir, repo_url, f"refs/heads/{args.branch}")
         print("\n=======================================================")
         print("SUCCESS! Successfully pushed to GitHub.")
         print("Navigate to the 'Actions' tab in your GitHub repository")
