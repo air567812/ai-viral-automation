@@ -38,7 +38,8 @@ def main():
 
     print(f"Pushing to remote {args.repo_url} on branch '{args.branch}'...")
     try:
-        refspec = f"refs/heads/{args.branch}:refs/heads/{args.branch}".encode("utf-8")
+        # Using '+' refspec for atomic force-push to overwrite any initial placeholder readme
+        refspec = f"+refs/heads/{args.branch}:refs/heads/{args.branch}".encode("utf-8")
         porcelain.push(base_dir, repo_url, refspecs=[refspec])
         print("\n=======================================================")
         print("SUCCESS! Successfully pushed to GitHub.")
