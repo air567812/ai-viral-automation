@@ -1,4 +1,4 @@
-name: Autonomous Cloud Content Factory
+name: Autonomous Viral Reels Pipeline
 
 on:
   # Automated Cloud Schedule: Runs every 6 hours
@@ -73,9 +73,9 @@ jobs:
           YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
           YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
           YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
-          # Storage & Zero-Waste Policy
+          # Storage & Retention Policy: preserve renders for GitHub artifact download
           STORAGE_PROVIDER: "local"
-          AUTO_CLEANUP_AFTER_UPLOAD: "true"
+          AUTO_CLEANUP_AFTER_UPLOAD: "false"
         run: |
           NICHE="${{ github.event.inputs.niche || 'sci-fi and mystery' }}"
           DURATION="${{ github.event.inputs.duration || '45' }}"
@@ -86,7 +86,19 @@ jobs:
             AUTO_PUB_FLAG="--auto-publish"
           fi
 
-          python backend/cli.py --niche "$NICHE" --duration "$DURATION" $AUTO_PUB_FLAG
+          python backend/cli.py --niche "$NICHE" --duration "$DURATION" $AUTO_PUB_FLAG --keep-renders
+
+      - name: Upload Generated Videos & Media Packages
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: generated-viral-videos
+          path: |
+            data/media/renders/*.mp4
+            data/media/audio/*.mp3
+            data/media/subtitles/*
+            data/automation.db
+          retention-days: 14
 
       - name: Archive Generation Logs & Database
         if: always()

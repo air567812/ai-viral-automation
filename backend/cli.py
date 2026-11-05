@@ -19,6 +19,7 @@ async def run_cli():
     parser.add_argument("--auto-publish", action="store_true", help="Automatically publish without holding for manual approval")
     parser.add_argument("--simulation", action="store_true", help="Force Google Veo simulation mode for testing")
     parser.add_argument("--duration", type=int, default=45, help="Target video duration in seconds")
+    parser.add_argument("--keep-renders", action="store_true", help="Preserve rendered videos and media files")
     
     args = parser.parse_args()
 
@@ -26,6 +27,8 @@ async def run_cli():
         settings.VEO_SIMULATION_MODE = True
     if args.duration:
         settings.DEFAULT_VIDEO_DURATION_SECONDS = args.duration
+    if args.keep_renders or os.getenv("AUTO_CLEANUP_AFTER_UPLOAD", "").lower() in ["false", "0", "no"]:
+        settings.AUTO_CLEANUP_AFTER_UPLOAD = False
 
     logger.info("Initializing database tables...")
     await init_db()
